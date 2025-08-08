@@ -1,34 +1,58 @@
 "use client";
-import { useState } from 'react';
-import styles from '@/styles/page/login.module.scss';
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import styles from "@/styles/page/login.module.scss";
 
 export default function LoginPage() {
-  const [userId, setUserId] = useState('');
-  const [password, setPassword] = useState('');
+  const router = useRouter();
+  const sp = useSearchParams();
+
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+
+    setSubmitting(true);
     setMessage(null);
     setError(null);
+
     try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, password }),
+        credentials: "include",
       });
-      const data = await res.json();
-      console.log(data)
+      const data = await res.json().catch(() => ({} as any));
 
       if (!res.ok) {
-        // APIからのエラーメッセージを表示
-        setError(data.message || '認証中にエラーが発生しました');
-      } else {
-        setMessage(data.message);
+        setError((data as any).message || "認証中にエラーが発生しました");
+        setSubmitting(false);
+        return;
       }
-    } catch (err: any) {
-      setError('通信エラーが発生しました');
+
+      setMessage((data as any).message ?? "ログインしました");
+
+      const rawFrom = sp.get("from");
+      const safeFrom =
+        rawFrom && rawFrom.startsWith("/") && !rawFrom.startsWith("//")
+          ? rawFrom
+          : "/";
+
+      const destination =
+        safeFrom === "/login" || (safeFrom && safeFrom.startsWith("/login?"))
+          ? "/"
+          : safeFrom;
+
+      router.replace(destination);
+    } catch {
+      setError("通信エラーが発生しました");
+      setSubmitting(false);
     }
   };
 
@@ -42,10 +66,12 @@ export default function LoginPage() {
           <input
             type="text"
             value={userId}
-            onChange={e => setUserId(e.target.value)}
+            onChange={(e) => setUserId(e.target.value)}
             className={styles.input}
             placeholder="YourUserID"
             required
+            autoComplete="username"
+            disabled={submitting}
           />
         </label>
 
@@ -54,15 +80,17 @@ export default function LoginPage() {
           <input
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             className={styles.input}
             placeholder="Password"
             required
+            autoComplete="current-password"
+            disabled={submitting}
           />
         </label>
 
-        <button type="submit" className={styles.button}>
-          ログイン
+        <button type="submit" className={styles.button} disabled={submitting}>
+          {submitting ? "送信中..." : "ログイン"}
         </button>
 
         {message && <p className={styles.message}>{message}</p>}
