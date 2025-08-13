@@ -1,0 +1,9 @@
+~/.ssh/config
+
+Host 10.0.*.*
+KexAlgorithms +diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1,diffie-hellman-group1-sha1
+Ciphers aes128-cbc
+
+Cli
+ssh -o HostkeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa ngg@10.0.1.14
+
