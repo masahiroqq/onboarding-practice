@@ -20,14 +20,18 @@ type Row = { id: string };
 export async function POST(req: NextRequest) {
   const { userId, password } = await req.json();
 
-  const rawSql =
-    `SELECT id FROM users` +
-    ` WHERE id='${userId}'` +
-    ` AND password='${password}';`;
+  stmt = db.prepare('SELECT id FROM users WHERE id = ? AND password = ?');
+
+  // rows = stmt.all(userId, password);
+
+  // const rawSql =
+  //   `SELECT id FROM users` +
+  //   ` WHERE id='${userId}'` +
+  //   ` AND password='${password}';`;
 
   let rows: Row[];
   try {
-    rows = db.prepare(rawSql).all() as Row[];
+    rows = stmt.all(userId, password) as Row[];
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 400 });
   }
@@ -45,7 +49,7 @@ export async function POST(req: NextRequest) {
   const token = Buffer.from(JSON.stringify({ uid, iat: Date.now() })).toString('base64url');
 
   const res = NextResponse.json({
-    sql: rawSql,
+    // sql: rawSql,
     result: rows,
     message: 'ログインしました',
   });
