@@ -8,7 +8,8 @@ export function middleware(req: NextRequest) {
 
   // 公開パスは素通し
   const isPublic =
-    pathname.startsWith("/login") ||
+    // pathname.startsWith("/login") 
+    pathname === "/login"　||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico" ||
     pathname === "/robots.txt" ||
