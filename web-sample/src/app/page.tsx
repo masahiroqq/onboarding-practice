@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import styles from "@/styles/page/home.module.scss";
+import DOMPurify from 'dompurify'
+
 
 export default function Home() {
   const [userInput, setUserInput] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setUserInput(params.get('input') || '');
+    setUserInput(DOMPurify.sanitize(params.get('input') || ''));
   }, []);
 
   return (
@@ -16,11 +18,12 @@ export default function Home() {
       <div className={styles.card}>
         <h1 className={styles.title}>オペ技へ ようこそ！</h1>
 
-        <div
+{/*         <div
           className={styles.userContent}
           dangerouslySetInnerHTML={{ __html: userInput }}
         />
-
+ */}
+        
         <img
           className={styles.logo}
           src="logo.png"
