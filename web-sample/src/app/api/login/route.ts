@@ -12,7 +12,7 @@ db.exec(`
   );
 
   INSERT OR IGNORE INTO users (id, password) VALUES
-    ('user', 'kddi0077Sample!');
+    ('user', 'arigatatematsu');
 `);
 
 type Row = { id: string };
